@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight, Bot, BriefcaseBusiness, Calculator, Car, CircleDollarSign,
+  ArrowRight, Bot, BriefcaseBusiness, Calculator, Car, ChevronLeft, ChevronRight, CircleDollarSign,
   Facebook, HeartPulse, Instagram, Landmark, Map, MapPin, Menu, MessageCircle,
   Phone, Plane, Search, Send, Store, Sun, Theater, Utensils, Wrench, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/palawan-hero.jpg";
+import { destinations, PANEL_CLASSES, pickInitialIndex, rememberIndex } from "@/lib/destinations";
 import destinationImage from "@/assets/destinations-grid.jpg";
 import popularImage from "@/assets/popular-grid.jpg";
 import sponsoredImage from "@/assets/sponsored-chicken.jpg";
@@ -24,14 +24,7 @@ export const Route = createFileRoute("/")({
 });
 
 const nav = ["Home", "Food", "Places", "Local", "How-To", "Money", "Travel", "Culture", "Providers"];
-const destinations = [
-  ["El Nido, Palawan", "Crystal-clear lagoons, dramatic limestone cliffs, and island adventures await."],
-  ["Chocolate Hills, Bohol", "A remarkable landscape of rolling hills, heritage towns, and warm island welcomes."],
-  ["Mayon Volcano, Albay", "Perfect volcanic symmetry, spicy Bicolano food, and unforgettable countryside views."],
-  ["Banaue Rice Terraces, Ifugao", "Walk ancient green terraces shaped by generations of Cordilleran communities."],
-  ["Boracay, Aklan", "Powder-soft white sand, calm blue water, and brilliant sunsets by the shore."],
-  ["Siargao, Surigao del Norte", "Surf breaks, palm roads, rock pools, and slow island mornings."],
-] as const;
+const HERO_HEIGHT = "min-h-[560px] sm:min-h-[540px]";
 
 const categories = [
   [Utensils, "Food", "Recipes & cuisine"], [MapPin, "Places", "Destinations"], [Store, "Local", "Businesses"],
@@ -59,8 +52,38 @@ function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-  const featured = useMemo(() => destinations[Math.floor(Math.random() * destinations.length)], []);
-  const [featuredName, featuredCopy] = featured ?? destinations[0];
+  const [destIndex, setDestIndexState] = useState(0);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const thumbStripRef = useRef<HTMLDivElement>(null);
+  const bootedRef = useRef(false);
+
+  const setDestIndex = (next: number) => {
+    const wrapped = (next + destinations.length) % destinations.length;
+    if (wrapped === destIndex) return;
+    setPrevIndex(destIndex);
+    setDestIndexState(wrapped);
+    rememberIndex(wrapped);
+  };
+
+  // After hydration, pick this session's destination (avoids SSR/client mismatch).
+  useEffect(() => {
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+    const picked = pickInitialIndex();
+    if (picked !== 0) {
+      setPrevIndex(0);
+      setDestIndexState(picked);
+    }
+  }, []);
+
+  const current = destinations[destIndex] ?? destinations[0]!;
+  const previous = prevIndex != null ? destinations[prevIndex] ?? null : null;
+
+  useEffect(() => {
+    const strip = thumbStripRef.current;
+    const active = strip?.querySelector<HTMLElement>("[data-active='true']");
+    active?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [destIndex]);
 
   const handleDemo = (message: string) => setNotice(message);
   return <div className="min-h-screen bg-background text-foreground">
@@ -82,19 +105,22 @@ function HomePage() {
 
     <main id="top" className="mx-auto max-w-[1440px] px-4 pb-16 sm:px-7">
       <section className="pt-5 sm:pt-7" aria-labelledby="hero-title">
-        <div className="relative min-h-[560px] overflow-hidden rounded-[28px] shadow-coastal sm:min-h-[540px]">
-          <img src={heroImage} alt="Aerial view of turquoise lagoons and limestone islands in Palawan" width={1920} height={1088} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
+        <div className={`relative overflow-hidden rounded-[28px] shadow-coastal ${HERO_HEIGHT}`}>
+          {previous && <img key={`prev-${previous.slug}`} src={previous.image} alt="" width={1920} height={1024} aria-hidden className={`absolute inset-0 h-full w-full object-cover ${PANEL_CLASSES[previous.panel]}`} />}
+          <img key={current.slug} src={current.image} alt={`${current.name}, ${current.provinceOrArea}, Philippines`} width={1920} height={1024} fetchPriority="high" className={`absolute inset-0 h-full w-full object-cover hero-image-fade ${PANEL_CLASSES[current.panel]}`} />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent" />
-          <div className="relative flex min-h-[560px] max-w-2xl flex-col justify-center p-6 pb-28 sm:min-h-[540px] sm:p-12 sm:pb-32">
-            <p className="mb-3 text-xs font-extrabold uppercase text-sun">Discover the Philippines</p>
-            <h1 id="hero-title" className="max-w-xl text-4xl font-extrabold leading-tight text-primary-foreground sm:text-6xl">Today, Explore <span className="text-sun">{featuredName}</span></h1>
-            <p className="mt-4 max-w-xl text-base leading-7 text-primary-foreground/85 sm:text-lg">{featuredCopy}</p>
-            <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-primary-foreground"><MapPin className="size-4" />{featuredName}</p>
-            <div className="mt-6 flex flex-wrap gap-3"><Button variant="sun" size="pill" onClick={() => handleDemo(`Exploring ${featuredName}.`)}>Explore <ArrowRight /></Button><Button variant="glass" size="pill" onClick={() => handleDemo("Destination guides are coming soon.")}>See Guide</Button></div>
+          <button onClick={() => setDestIndex(destIndex - 1)} aria-label={`Previous destination`} className="absolute left-3 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface-glass text-primary shadow-sm backdrop-blur transition hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun sm:left-5"><ChevronLeft className="size-5" /></button>
+          <button onClick={() => setDestIndex(destIndex + 1)} aria-label={`Next destination`} className="absolute right-3 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface-glass text-primary shadow-sm backdrop-blur transition hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun sm:right-5"><ChevronRight className="size-5" /></button>
+          <div key={`text-${current.slug}`} className={`relative flex max-w-2xl flex-col justify-center p-6 pb-28 pl-16 sm:p-12 sm:pb-32 sm:pl-20 ${HERO_HEIGHT}`}>
+            <p className="mb-3 text-xs font-extrabold uppercase text-sun hero-text-rise">Discover the Philippines</p>
+            <h1 id="hero-title" className="max-w-xl text-4xl font-extrabold leading-tight text-primary-foreground sm:text-6xl hero-text-rise">Today, Explore <span className="text-sun">{current.name}</span></h1>
+            <p className="mt-4 max-w-xl text-base leading-7 text-primary-foreground/85 sm:text-lg hero-text-rise">{current.description}</p>
+            <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-primary-foreground hero-text-rise"><MapPin className="size-4" />{current.name}, {current.provinceOrArea}</p>
+            <div className="mt-6 flex flex-wrap gap-3 hero-text-rise"><Button variant="sun" size="pill" onClick={() => handleDemo(`${current.exploreLabel} — ${current.slug} page coming soon.`)}>{current.exploreLabel} <ArrowRight /></Button><Button variant="glass" size="pill" onClick={() => handleDemo(`The ${current.name} travel guide is coming soon.`)}>See Travel Guide</Button></div>
           </div>
-          <div className="absolute inset-x-4 bottom-4 flex items-end gap-2 overflow-x-auto sm:inset-x-8">
-            {destinations.slice(0, 6).map(([name], i) => <button key={name} onClick={() => handleDemo(`${name} preview selected.`)} className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 ${name === featuredName ? "border-sun" : "border-primary-foreground/70"}`} aria-label={`Preview ${name}`}><img src={destinationImage} alt="" width={1920} height={1024} className={`h-full object-cover ${["image-panel-two","image-panel-three","image-panel-four","image-panel-one"][i%4]}`} /><span className="absolute inset-x-0 bottom-0 bg-primary/75 px-1 py-0.5 text-[9px] font-bold text-primary-foreground">{name.split(",")[0]}</span></button>)}
-            <span className="ml-auto hidden rounded-full bg-surface-glass px-3 py-2 text-xs font-bold text-primary sm:block">1 of 12</span>
+          <div ref={thumbStripRef} role="listbox" aria-label="Featured Philippine destinations" className="absolute inset-x-4 bottom-4 flex items-end gap-2 overflow-x-auto pb-1 sm:inset-x-8">
+            {destinations.map((dest, i) => <button key={dest.slug} role="option" aria-selected={i === destIndex} data-active={i === destIndex} onClick={() => setDestIndex(i)} aria-label={`Show ${dest.name}, ${dest.provinceOrArea}`} className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun ${i === destIndex ? "border-sun shadow-sun" : "border-primary-foreground/70 opacity-80 hover:opacity-100"}`}><img src={dest.image} alt="" width={1920} height={1024} loading="lazy" className={`h-full object-cover ${PANEL_CLASSES[dest.panel]}`} /><span className="absolute inset-x-0 bottom-0 bg-primary/75 px-1 py-0.5 text-[9px] font-bold text-primary-foreground">{dest.name.split(",")[0]}</span></button>)}
+            <span className="ml-auto hidden shrink-0 rounded-full bg-surface-glass px-3 py-2 text-xs font-bold text-primary sm:block">{destIndex + 1} of {destinations.length}</span>
           </div>
         </div>
       </section>
@@ -146,7 +172,7 @@ function HomePage() {
 
       <SectionHeader title="Useful Tools for Everyday Filipinos" subtitle="Calculate, convert, and get quick answers with our free tools." />
       <section id="tools" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" aria-label="Everyday tools">
-        {[[CircleDollarSign,"Peso Converter"],[Calculator,"Loan Calculator"],[Car,"Mileage Calculator"],[HeartPulse,"BMI Calculator"],[Plane,"Remittance Calculator"],[Map,"More Tools"]].map(([Icon, title]) => <Link key={title as string} to="/tools" className="rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-secondary"><span className="grid size-10 place-items-center rounded-xl bg-accent text-secondary"><Icon className="size-5" /></span><h3 className="mt-3 text-sm font-bold text-primary">{title as string}</h3></Link>)}
+        {([[CircleDollarSign,"Peso Converter"],[Calculator,"Loan Calculator"],[Car,"Mileage Calculator"],[HeartPulse,"BMI Calculator"],[Plane,"Remittance Calculator"],[Map,"More Tools"]] as [typeof CircleDollarSign, string][]).map(([Icon, title]) => <Link key={title} to="/tools" className="rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-secondary"><span className="grid size-10 place-items-center rounded-xl bg-accent text-secondary"><Icon className="size-5" /></span><h3 className="mt-3 text-sm font-bold text-primary">{title}</h3></Link>)}
       </section>
 
       <section className="mt-12 overflow-hidden rounded-3xl bg-sun p-7 text-sun-foreground sm:p-10"><div className="max-w-2xl"><h2 className="text-3xl font-extrabold">Be Part of PinoyLokal</h2><p className="mt-3 text-sun-foreground/75">List your business or service and reach more Filipinos in your community.</p><Button variant="coastal" size="pill" className="mt-6" onClick={() => handleDemo("Listing submissions are coming soon.")}>+ Add Your Listing</Button></div></section>
