@@ -52,8 +52,28 @@ function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-  const featured = useMemo(() => destinations[Math.floor(Math.random() * destinations.length)], []);
-  const [featuredName, featuredCopy] = featured ?? destinations[0];
+  const [destIndex, setDestIndexState] = useState<number>(() => (typeof window === "undefined" ? 0 : pickInitialIndex()));
+  const prevIndexRef = useRef<number | null>(null);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const thumbStripRef = useRef<HTMLDivElement>(null);
+
+  const setDestIndex = (next: number) => {
+    const wrapped = (next + destinations.length) % destinations.length;
+    prevIndexRef.current = destIndex;
+    setPrevIndex(destIndex);
+    setDestIndexState(wrapped);
+    rememberIndex(wrapped);
+  };
+
+  const current = destinations[destIndex] ?? destinations[0];
+  const previous = prevIndex != null ? destinations[prevIndex] : null;
+  void prevIndexRef;
+
+  useEffect(() => {
+    const strip = thumbStripRef.current;
+    const active = strip?.querySelector<HTMLElement>("[data-active='true']");
+    active?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [destIndex]);
 
   const handleDemo = (message: string) => setNotice(message);
   return <div className="min-h-screen bg-background text-foreground">
