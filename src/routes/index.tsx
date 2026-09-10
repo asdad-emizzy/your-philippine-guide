@@ -52,22 +52,32 @@ function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-  const [destIndex, setDestIndexState] = useState<number>(() => (typeof window === "undefined" ? 0 : pickInitialIndex()));
-  const prevIndexRef = useRef<number | null>(null);
+  const [destIndex, setDestIndexState] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const thumbStripRef = useRef<HTMLDivElement>(null);
+  const bootedRef = useRef(false);
 
   const setDestIndex = (next: number) => {
     const wrapped = (next + destinations.length) % destinations.length;
-    prevIndexRef.current = destIndex;
+    if (wrapped === destIndex) return;
     setPrevIndex(destIndex);
     setDestIndexState(wrapped);
     rememberIndex(wrapped);
   };
 
+  // After hydration, pick this session's destination (avoids SSR/client mismatch).
+  useEffect(() => {
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+    const picked = pickInitialIndex();
+    if (picked !== 0) {
+      setPrevIndex(0);
+      setDestIndexState(picked);
+    }
+  }, []);
+
   const current = destinations[destIndex] ?? destinations[0]!;
-  const previous = prevIndex != null ? destinations[prevIndex] : null;
-  void prevIndexRef;
+  const previous = prevIndex != null ? destinations[prevIndex] ?? null : null;
 
   useEffect(() => {
     const strip = thumbStripRef.current;
@@ -96,7 +106,7 @@ function HomePage() {
     <main id="top" className="mx-auto max-w-[1440px] px-4 pb-16 sm:px-7">
       <section className="pt-5 sm:pt-7" aria-labelledby="hero-title">
         <div className={`relative overflow-hidden rounded-[28px] shadow-coastal ${HERO_HEIGHT}`}>
-          {previous && <img key={`prev-${destinations[prevIndex!].slug}`} src={previous.image} alt="" width={1920} height={1024} aria-hidden className={`absolute inset-0 h-full w-full object-cover ${PANEL_CLASSES[previous.panel]}`} />}
+          {previous && <img key={`prev-${previous.slug}`} src={previous.image} alt="" width={1920} height={1024} aria-hidden className={`absolute inset-0 h-full w-full object-cover ${PANEL_CLASSES[previous.panel]}`} />}
           <img key={current.slug} src={current.image} alt={`${current.name}, ${current.provinceOrArea}, Philippines`} width={1920} height={1024} fetchPriority="high" className={`absolute inset-0 h-full w-full object-cover hero-image-fade ${PANEL_CLASSES[current.panel]}`} />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent" />
           <button onClick={() => setDestIndex(destIndex - 1)} aria-label={`Previous destination`} className="absolute left-3 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface-glass text-primary shadow-sm backdrop-blur transition hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun sm:left-5"><ChevronLeft className="size-5" /></button>
