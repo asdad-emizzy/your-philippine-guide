@@ -65,7 +65,7 @@ function HomePage() {
     rememberIndex(wrapped);
   };
 
-  const current = destinations[destIndex] ?? destinations[0];
+  const current = destinations[destIndex] ?? destinations[0]!;
   const previous = prevIndex != null ? destinations[prevIndex] : null;
   void prevIndexRef;
 
@@ -162,7 +162,7 @@ function HomePage() {
 
       <SectionHeader title="Useful Tools for Everyday Filipinos" subtitle="Calculate, convert, and get quick answers with our free tools." />
       <section id="tools" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" aria-label="Everyday tools">
-        {[[CircleDollarSign,"Peso Converter"],[Calculator,"Loan Calculator"],[Car,"Mileage Calculator"],[HeartPulse,"BMI Calculator"],[Plane,"Remittance Calculator"],[Map,"More Tools"]].map(([Icon, title]) => <Link key={title as string} to="/tools" className="rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-secondary"><span className="grid size-10 place-items-center rounded-xl bg-accent text-secondary"><Icon className="size-5" /></span><h3 className="mt-3 text-sm font-bold text-primary">{title as string}</h3></Link>)}
+        {([[CircleDollarSign,"Peso Converter"],[Calculator,"Loan Calculator"],[Car,"Mileage Calculator"],[HeartPulse,"BMI Calculator"],[Plane,"Remittance Calculator"],[Map,"More Tools"]] as [typeof CircleDollarSign, string][]).map(([Icon, title]) => <Link key={title} to="/tools" className="rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-1 hover:border-secondary"><span className="grid size-10 place-items-center rounded-xl bg-accent text-secondary"><Icon className="size-5" /></span><h3 className="mt-3 text-sm font-bold text-primary">{title}</h3></Link>)}
       </section>
 
       <section className="mt-12 overflow-hidden rounded-3xl bg-sun p-7 text-sun-foreground sm:p-10"><div className="max-w-2xl"><h2 className="text-3xl font-extrabold">Be Part of PinoyLokal</h2><p className="mt-3 text-sun-foreground/75">List your business or service and reach more Filipinos in your community.</p><Button variant="coastal" size="pill" className="mt-6" onClick={() => handleDemo("Listing submissions are coming soon.")}>+ Add Your Listing</Button></div></section>
