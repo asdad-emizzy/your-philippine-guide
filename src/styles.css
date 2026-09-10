@@ -176,3 +176,19 @@
 @utility image-panel-two { object-position: 33.333% center; width: 400%; max-width: none; transform: translateX(-25%); }
 @utility image-panel-three { object-position: 66.666% center; width: 400%; max-width: none; transform: translateX(-50%); }
 @utility image-panel-four { object-position: 100% center; width: 400%; max-width: none; transform: translateX(-75%); }
+
+/* Hero destination crossfade + text fade */
+@keyframes hero-image-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes hero-text-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility hero-image-fade { animation: hero-image-fade 0.7s ease-out both; }
+@utility hero-text-rise { animation: hero-text-rise 0.55s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-image-fade, .hero-text-rise { animation: none; }
+}
