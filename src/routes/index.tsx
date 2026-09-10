@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight, Bot, BriefcaseBusiness, Calculator, Car, CircleDollarSign,
+  ArrowRight, Bot, BriefcaseBusiness, Calculator, Car, ChevronLeft, ChevronRight, CircleDollarSign,
   Facebook, HeartPulse, Instagram, Landmark, Map, MapPin, Menu, MessageCircle,
   Phone, Plane, Search, Send, Store, Sun, Theater, Utensils, Wrench, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/palawan-hero.jpg";
+import { destinations, PANEL_CLASSES, pickInitialIndex, rememberIndex } from "@/lib/destinations";
 import destinationImage from "@/assets/destinations-grid.jpg";
 import popularImage from "@/assets/popular-grid.jpg";
 import sponsoredImage from "@/assets/sponsored-chicken.jpg";
@@ -24,14 +24,7 @@ export const Route = createFileRoute("/")({
 });
 
 const nav = ["Home", "Food", "Places", "Local", "How-To", "Money", "Travel", "Culture", "Providers"];
-const destinations = [
-  ["El Nido, Palawan", "Crystal-clear lagoons, dramatic limestone cliffs, and island adventures await."],
-  ["Chocolate Hills, Bohol", "A remarkable landscape of rolling hills, heritage towns, and warm island welcomes."],
-  ["Mayon Volcano, Albay", "Perfect volcanic symmetry, spicy Bicolano food, and unforgettable countryside views."],
-  ["Banaue Rice Terraces, Ifugao", "Walk ancient green terraces shaped by generations of Cordilleran communities."],
-  ["Boracay, Aklan", "Powder-soft white sand, calm blue water, and brilliant sunsets by the shore."],
-  ["Siargao, Surigao del Norte", "Surf breaks, palm roads, rock pools, and slow island mornings."],
-] as const;
+const HERO_HEIGHT = "min-h-[560px] sm:min-h-[540px]";
 
 const categories = [
   [Utensils, "Food", "Recipes & cuisine"], [MapPin, "Places", "Destinations"], [Store, "Local", "Businesses"],
