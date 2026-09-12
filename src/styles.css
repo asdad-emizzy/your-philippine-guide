@@ -177,6 +177,12 @@
 @utility image-panel-three { object-position: 66.666% center; width: 400%; max-width: none; transform: translateX(-50%); }
 @utility image-panel-four { object-position: 100% center; width: 400%; max-width: none; transform: translateX(-75%); }
 
+/* Hero full-bleed panel crops (one scene of a 4-panel sheet, slight zoom to hide sheet seams) */
+@utility hero-panel-one { position: absolute; top: 0; bottom: 0; left: 0%; width: 400%; max-width: none; height: 100%; object-fit: cover; transform: scale(1.07); transform-origin: 12.5% 50%; }
+@utility hero-panel-two { position: absolute; top: 0; bottom: 0; left: -100%; width: 400%; max-width: none; height: 100%; object-fit: cover; transform: scale(1.07); transform-origin: 37.5% 50%; }
+@utility hero-panel-three { position: absolute; top: 0; bottom: 0; left: -200%; width: 400%; max-width: none; height: 100%; object-fit: cover; transform: scale(1.07); transform-origin: 62.5% 50%; }
+@utility hero-panel-four { position: absolute; top: 0; bottom: 0; left: -300%; width: 400%; max-width: none; height: 100%; object-fit: cover; transform: scale(1.07); transform-origin: 87.5% 50%; }
+
 /* Hero destination crossfade + text fade */
 @keyframes hero-image-fade {
   from { opacity: 0; }

@@ -18,6 +18,7 @@ export interface Destination {
 }
 
 export const PANEL_CLASSES = ["image-panel-one", "image-panel-two", "image-panel-three", "image-panel-four"] as const;
+export const HERO_PANEL_CLASSES = ["hero-panel-one", "hero-panel-two", "hero-panel-three", "hero-panel-four"] as const;
 
 const d = (
   name: string,
