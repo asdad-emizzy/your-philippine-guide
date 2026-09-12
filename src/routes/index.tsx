@@ -6,7 +6,7 @@ import {
   Phone, Plane, Search, Send, Store, Sun, Theater, Utensils, Wrench, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { destinations, PANEL_CLASSES, pickInitialIndex, rememberIndex } from "@/lib/destinations";
+import { destinations, PANEL_CLASSES, HERO_PANEL_CLASSES, pickInitialIndex, rememberIndex } from "@/lib/destinations";
 import destinationImage from "@/assets/destinations-grid.jpg";
 import popularImage from "@/assets/popular-grid.jpg";
 import sponsoredImage from "@/assets/sponsored-chicken.jpg";
@@ -106,8 +106,8 @@ function HomePage() {
     <main id="top" className="mx-auto max-w-[1440px] px-4 pb-16 sm:px-7">
       <section className="pt-5 sm:pt-7" aria-labelledby="hero-title">
         <div className={`relative overflow-hidden rounded-[28px] shadow-coastal ${HERO_HEIGHT}`}>
-          {previous && <img key={`prev-${previous.slug}`} src={previous.image} alt="" width={1920} height={1024} aria-hidden className={`absolute inset-0 h-full w-full object-cover ${PANEL_CLASSES[previous.panel]}`} />}
-          <img key={current.slug} src={current.image} alt={`${current.name}, ${current.provinceOrArea}, Philippines`} width={1920} height={1024} fetchPriority="high" className={`absolute inset-0 h-full w-full object-cover hero-image-fade ${PANEL_CLASSES[current.panel]}`} />
+          {previous && <img key={`prev-${previous.slug}`} src={previous.image} alt="" width={1920} height={1024} aria-hidden className={HERO_PANEL_CLASSES[previous.panel]} />}
+          <img key={current.slug} src={current.image} alt={`${current.name}, ${current.provinceOrArea}, Philippines`} width={1920} height={1024} fetchPriority="high" className={`hero-image-fade ${HERO_PANEL_CLASSES[current.panel]}`} />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent" />
           <button onClick={() => setDestIndex(destIndex - 1)} aria-label={`Previous destination`} className="absolute left-3 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface-glass text-primary shadow-sm backdrop-blur transition hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun sm:left-5"><ChevronLeft className="size-5" /></button>
           <button onClick={() => setDestIndex(destIndex + 1)} aria-label={`Next destination`} className="absolute right-3 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface-glass text-primary shadow-sm backdrop-blur transition hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun sm:right-5"><ChevronRight className="size-5" /></button>
