@@ -7,24 +7,32 @@
  */
 import {
   attractions,
+  businesses,
   barangays,
   citiesMunicipalities,
   destinations,
+  foods,
   guides,
   islands,
   places,
+  providers,
   provinces,
   regions,
+  services,
   tools,
   tourismAreas,
 } from "./data";
 import type {
   AdministrativeLocation,
+  Business,
   Destination,
   DiscoveryLocation,
+  Food,
   Guide,
   Place,
+  Provider,
   Region,
+  Service,
   Slug,
   Tool,
 } from "./types";
@@ -154,6 +162,22 @@ export function listPlaces(): Place[] {
   return places;
 }
 
+export function listFoods(): Food[] {
+  return foods;
+}
+
+export function listBusinesses(): Business[] {
+  return businesses;
+}
+
+export function listServices(): Service[] {
+  return services;
+}
+
+export function listProviders(): Provider[] {
+  return providers;
+}
+
 export function listGuides(): Guide[] {
   return guides;
 }
@@ -169,50 +193,60 @@ export function getTool(slug: Slug): Tool | undefined {
 /* ---------------------------------- search ---------------------------------- */
 
 export interface SearchResult {
-  kind: "administrative" | "destination" | "place" | "guide" | "tool";
+  kind:
+    | "administrative"
+    | "destination"
+    | "place"
+    | "food"
+    | "business"
+    | "service"
+    | "provider"
+    | "guide"
+    | "tool";
   slug: Slug;
   name: string;
   summary?: string | undefined;
 }
 
+interface SearchableEntity {
+  slug: Slug;
+  name: string;
+  summary?: string;
+}
+
+function appendMatches(
+  results: SearchResult[],
+  kind: SearchResult["kind"],
+  entities: readonly SearchableEntity[],
+  queryLowercase: string,
+): void {
+  for (const entity of entities) {
+    const isMatch =
+      entity.name.toLowerCase().includes(queryLowercase) ||
+      (entity.summary?.toLowerCase().includes(queryLowercase) ?? false);
+    if (!isMatch) continue;
+    results.push({
+      kind,
+      slug: entity.slug,
+      name: entity.name,
+      summary: entity.summary,
+    });
+  }
+}
+
 /** Simple static, case-insensitive name/summary search. No search service. */
 export function searchContent(query: string, limit = 20): SearchResult[] {
-  const q = query.trim().toLowerCase();
-  if (q.length === 0) return [];
-
-  const matches = (name: string, summary?: string) =>
-    name.toLowerCase().includes(q) || (summary?.toLowerCase().includes(q) ?? false);
-
+  const queryLowercase = query.trim().toLowerCase();
+  if (queryLowercase.length === 0) return [];
   const results: SearchResult[] = [];
-  for (const location of administrativeAll) {
-    if (matches(location.name, location.summary))
-      results.push({
-        kind: "administrative",
-        slug: location.slug,
-        name: location.name,
-        summary: location.summary,
-      });
-  }
-  for (const destination of destinations) {
-    if (matches(destination.name, destination.summary))
-      results.push({
-        kind: "destination",
-        slug: destination.slug,
-        name: destination.name,
-        summary: destination.summary,
-      });
-  }
-  for (const place of places) {
-    if (matches(place.name, place.summary))
-      results.push({ kind: "place", slug: place.slug, name: place.name, summary: place.summary });
-  }
-  for (const guide of guides) {
-    if (matches(guide.name, guide.summary))
-      results.push({ kind: "guide", slug: guide.slug, name: guide.name, summary: guide.summary });
-  }
-  for (const tool of tools) {
-    if (matches(tool.name, tool.summary))
-      results.push({ kind: "tool", slug: tool.slug, name: tool.name, summary: tool.summary });
-  }
+  appendMatches(results, "administrative", administrativeAll, queryLowercase);
+  appendMatches(results, "destination", destinations, queryLowercase);
+  appendMatches(results, "place", places, queryLowercase);
+  appendMatches(results, "food", foods, queryLowercase);
+  appendMatches(results, "business", businesses, queryLowercase);
+  appendMatches(results, "service", services, queryLowercase);
+  appendMatches(results, "provider", providers, queryLowercase);
+  appendMatches(results, "guide", guides, queryLowercase);
+  appendMatches(results, "tool", tools, queryLowercase);
   return results.slice(0, limit);
 }
