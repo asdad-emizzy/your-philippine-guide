@@ -25,7 +25,14 @@ export const tools: Tool[] = [
     path: "/tools",
     available: false,
   },
-  { kind: "tool", slug: "loan-calculator", name: "Loan Calculator", category: "money", path: "/tools", available: false },
+  {
+    kind: "tool",
+    slug: "loan-calculator",
+    name: "Loan Calculator",
+    category: "money",
+    path: "/tools",
+    available: false,
+  },
   {
     kind: "tool",
     slug: "remittance-calculator",
@@ -42,5 +49,12 @@ export const tools: Tool[] = [
     path: "/tools",
     available: false,
   },
-  { kind: "tool", slug: "bmi-calculator", name: "BMI Calculator", category: "health", path: "/tools", available: false },
+  {
+    kind: "tool",
+    slug: "bmi-calculator",
+    name: "BMI Calculator",
+    category: "health",
+    path: "/tools",
+    available: false,
+  },
 ];

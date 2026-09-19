@@ -38,7 +38,12 @@ const administrativeAll: AdministrativeLocation[] = [
   ...barangays,
 ];
 
-const discoveryAll: DiscoveryLocation[] = [...destinations, ...islands, ...tourismAreas, ...attractions];
+const discoveryAll: DiscoveryLocation[] = [
+  ...destinations,
+  ...islands,
+  ...tourismAreas,
+  ...attractions,
+];
 
 function indexBySlug<T extends { slug: Slug }>(items: readonly T[]): Map<Slug, T> {
   return new Map(items.map((item) => [item.slug, item]));
@@ -181,7 +186,12 @@ export function searchContent(query: string, limit = 20): SearchResult[] {
   const results: SearchResult[] = [];
   for (const location of administrativeAll) {
     if (matches(location.name, location.summary))
-      results.push({ kind: "administrative", slug: location.slug, name: location.name, summary: location.summary });
+      results.push({
+        kind: "administrative",
+        slug: location.slug,
+        name: location.name,
+        summary: location.summary,
+      });
   }
   for (const destination of destinations) {
     if (matches(destination.name, destination.summary))
