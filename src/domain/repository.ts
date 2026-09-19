@@ -167,7 +167,7 @@ export interface SearchResult {
   kind: "administrative" | "destination" | "place" | "guide" | "tool";
   slug: Slug;
   name: string;
-  summary?: string;
+  summary?: string | undefined;
 }
 
 /** Simple static, case-insensitive name/summary search. No search service. */
