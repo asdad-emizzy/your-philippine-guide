@@ -59,7 +59,8 @@ src/domain/
     ├── administrative.ts
     ├── discovery.ts
     ├── content.ts
-     └── index.ts
+     └── index.t
+     s
 ```
 
 Phase 1A work must validate and complete this implementation in place.
